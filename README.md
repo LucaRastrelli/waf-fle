@@ -15,20 +15,40 @@ dashboard to drill-down and find quickly the most relevant events. It
 is designed to be fast and flexible, while keeping a powerful and easy
 to use filter, with almost all fields clickable to use on filter.
 
-Features
- * Central event console
- * Support Modsecurity in “traditional” and “Anomaly Scoring”
- * Brings mlog2waffle as a replacement to mlogc
- * Receive events using mlog2waffle or mlogc
-  * mlog2waffle: in real-time, following log tail, or batch scheduled in crontab
-  * mlogc: in real-time, piped with ModSecurity log, in batch scheduled in crontab
- * No sensor limit
- * Drill down of events with filter
- * Dashboard with recent events information
- * Almost every event data and charts are “clickable” deepening the drill down filter
- * Inverted filter (to filter for “all but this item”)
- * Filter for network (in CIDR format, x.x.x.x/22)
- * Original format (Raw) to event download
- * Use Mysql as database
- * Wizard to help configure log feed between ModSecurity sensors and WAF-FLE
- * Open Source released under GPL v2
+ABOUT THIS FORK:
+---------
+What's new:
+   - PHP 8.x
+   - Admin User and Normal User
+   - Zoom in Total Event Graphs
+   - Removed APC references, now it supports only APCu
+   - Updated SQL queries
+
+To do:
+   - Update Tags from OWASP Top 10 2021
+   - Update graphs 
+   - Update style
+   - Everything that comes to mind
+
+Feel free to suggest new functionalities! 
+
+
+FEATURES FROM MAIN FORK:
+---------
+   - Central event console
+   - Support Modsecurity in “traditional” and “Anomaly Scoring”
+   - Brings mlog2waffle as a replacement to mlogc
+   - Receive events using mlog2waffle or mlogc
+      - mlog2waffle: in real-time, following log tail, or batch scheduled in crontab
+      - mlogc: in real-time, piped with ModSecurity log, in batch scheduled in crontab
+   - No sensor limit
+   - Drill down of events with filter
+   - Dashboard with recent events information
+   - Almost every event data and charts are “clickable” deepening the drill down filter
+   - Inverted filter (to filter for “all but this item”)
+   - Filter for network (in CIDR format, x.x.x.x/22)
+   - Original format (Raw) to event download
+   - Use Mysql as database
+   - Wizard to help configure log feed between ModSecurity sensors and WAF-FLE
+   - Open Source released under GPL v2
+
