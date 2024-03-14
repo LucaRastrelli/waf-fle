@@ -38,7 +38,7 @@ foreach (getallheaders() as $header => $value) {
 if (!isset($MLOG2WAFFLE_DEBUG)) {
    $MLOG2WAFFLE_DEBUG = FALSE;
 }
-$remote_address = apache_getenv("REMOTE_ADDR");
+$remote_address = $_SERVER["REMOTE_ADDR"];
 
 // Validate sensor account
 $login_status = sensorLogin($remote_address, $matches[1], $http_header["USER"], $http_header["PASS"]);
@@ -46,7 +46,7 @@ $login_status = sensorLogin($remote_address, $matches[1], $http_header["USER"], 
 if ($login_status['status'] == 1) {
     $sensor_id   = $login_status['sensor_id'];
     // Tell do Apache the "username", to register on logs
-    apache_setenv("REMOTE_USER", $login_status['sensor_name']);
+    $_SERVER["REMOTE_USER"] = $login_status['sensor_name'];
 } elseif ($login_status['status'] == 0) {
     header("HTTP/1.1 403 Forbidden");
     header("Status: 403");
@@ -85,7 +85,8 @@ while ( $line < $BodySize) {
             if (preg_match('/^\-\-[a-f0-9]+\-[BCEFHIKZ]\-\-$/i', trim($BODY[$line]))) {
                 break;
             } else {
-                if (preg_match('/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@]{24})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',
+                // matching before 2.9.4 
+                if (preg_match('/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@]{27})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',
             trim($BODY[$line]), $matchesA)) {
                     $PhaseA['Day'] = $matchesA[1];
                     $months        = array(null, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
@@ -104,6 +105,27 @@ while ( $line < $BodySize) {
                     $PhaseA['SourcePort'] = $matchesA[8];
                     $PhaseA['ServerIP']   = $matchesA[9];
                     $PhaseA['ServerPort'] = $matchesA[10];
+                }
+                // matching after 2.9.4
+                else if (preg_match('/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\.(\d{6})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@]{27})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',
+                trim($BODY[$line]), $matchesA)) {
+                    $PhaseA['Day'] = $matchesA[1];
+                    $months        = array(null, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
+                    foreach ($months as $key => $month) {
+                        if ($month == $matchesA[2]) {
+                            $PhaseA['Month'] = $key;
+                        }
+                    }
+                    $PhaseA['Year']       = $matchesA[3];
+                    $PhaseA['Hour']       = $matchesA[4];
+                    $PhaseA['Timestamp']  = $matchesA[3]."-".$PhaseA['Month']."-".$matchesA[1]." ".$matchesA[4];
+                    $PhaseA['Timezone']   = $matchesA[6];
+                    $PhaseA['Date']       = $matchesA[3]."-".$PhaseA['Month']."-".$matchesA[1];
+                    $PhaseA['UniqID']     = $matchesA[7];
+                    $PhaseA['ClientIP']   = $matchesA[8];
+                    $PhaseA['SourcePort'] = $matchesA[9];
+                    $PhaseA['ServerIP']   = $matchesA[10];
+                    $PhaseA['ServerPort'] = $matchesA[11];
                 }
                 $PhaseA_full = $PhaseA_full . $BODY[$line];
                 $line++;
@@ -579,7 +601,7 @@ if (!isset($PhaseH['Message_Severity']) || is_null($PhaseH['Message_Severity']))
 };
 
 try {
-
+    
     $insert_sth = $dbconn->prepare($sql_event);
     $insert_sth->bindParam(":sensorid", $sensor_id);
     $insert_sth->bindParam(":PhaseATimestamp", $PhaseA['Timestamp']);
@@ -587,6 +609,7 @@ try {
     $insert_sth->bindParam(":PhaseADate", $PhaseA['Date']);
     $insert_sth->bindParam(":PhaseAUniqID", $PhaseA['UniqID']);
     $insert_sth->bindParam(":PhaseAClientIP", $PhaseA['ClientIP']);
+    /*
     // Get Country Code of IP Address
     $ClientIPCC = geoip_country_code_by_name($PhaseA['ClientIP']);
     if (!$ClientIPCC) {
@@ -599,6 +622,9 @@ try {
     } elseif ( $ClientIPASN == "") {
        $ClientIPASN = '0';
     }
+    */
+    $ClientIPCC = '';
+    $ClientIPASN = '0';
     $insert_sth->bindParam(":PhaseAClientIPCC", $ClientIPCC);
     $insert_sth->bindParam(":PhaseAClientIPASN", $ClientIPASN);
     $insert_sth->bindParam(":PhaseASourcePort", $PhaseA['SourcePort']);
@@ -804,7 +830,7 @@ if (is_array($PhaseH_MSG) && $event_id != "") {
                             exit();
                         }
                     }
-				}
+				} 
 				
 				$sql_ruleMessage = 'INSERT IGNORE INTO `rule_message` (`message_ruleId`, `message_ruleMsg`) VALUES (:MessageRuleId2, :MessageMsg)';
 				$insert_ruleMessage_sth = $dbconn->prepare($sql_ruleMessage);

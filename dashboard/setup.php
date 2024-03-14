@@ -405,7 +405,6 @@ if (file_exists("../config.php")) {
     // in case of some error, exit
     if ($configphpError) {
         print "<b>Configuration file \"config.php\" has errors, check above what's wrong. After solved, run setup again!</b><br>";
-        break;
     } else {
         print "&nbsp;&nbsp; Config looks correct.<br>";
     }
@@ -427,8 +426,8 @@ if (file_exists("../config.php")) {
     print "<b>Checking php extensions...</b><br>";
     
     // Check if php is compiled with all necessary modules
-    if (extension_loaded('apc')) {
-        print "&nbsp;&nbsp; APC Extension: present,";
+    if (extension_loaded('apcu')) {
+        print "&nbsp;&nbsp; APCu Extension: present,";
         if (ini_get('apc.enabled')) {
             print " enabled; <br />";
         } else {
@@ -441,10 +440,10 @@ if (file_exists("../config.php")) {
         }
     } else {
         if ($APC_ON) {
-            print "&nbsp;&nbsp; APC Extension: missing. Install to run WAF-FLE with APC or disable in config.php<br>";
+            print "&nbsp;&nbsp; APCu Extension: missing. Install to run WAF-FLE with APCu or disable in config.php<br>";
             $extensionError = true;
         } else {
-            print "&nbsp;&nbsp; APC Extension: missing. Not required by config.php<br>";
+            print "&nbsp;&nbsp; APCu Extension: missing. Not required by config.php<br>";
         }        
     }
 
@@ -496,15 +495,14 @@ if (file_exists("../config.php")) {
         print "&nbsp;&nbsp; session Extension: missing.<br/>";
         $extensionError = true;
     }
-    if (apache_getenv("REMOTE_ADDR")) {
+    if ($_SERVER["REMOTE_ADDR"]) {
         print "&nbsp;&nbsp; Running on Apache: Ok;<br/>";
     } else {
         print "&nbsp;&nbsp; Not running on Apache: missing.<br/>";
         $extensionError = true;
     }
     if ($extensionError) {
-        print "<b>Erro in PHP Extensions, check above what's wrong. After dependency solved, run setup again!</b><br>";
-        break;
+        print "<b>Error in PHP Extensions, check above what's wrong. After dependency solved, run setup again!</b><br>";
     }
     print "<br />";
 

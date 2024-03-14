@@ -63,7 +63,7 @@ require_once("../filterprocessing.php");
             if (is_array($sensorPie)) {
                 $sensorLoop = 0;
                 reset($sensorPie);
-                while (list($key, $sensorData) = each($sensorPie)) {
+                foreach ($sensorPie as $key => $sensorData) {
                     $name = isset($sensorData['sensor_name']) ? $sensorData['sensor_name'] : 'Unknow';
                     $count = isset($sensorData['sensor_percent']) ? $sensorData['sensor_percent'] : 0;
                     $url = isset($sensorData['sensor_id']) ? "index.php?src_sensor=" .$sensorData['sensor_id'] : null;
@@ -127,7 +127,7 @@ require_once("../filterprocessing.php");
             if (is_array($severityPie)) {
                 $severityLoop = 0;
                 reset($severityPie);
-                while (list($key, $severityData) = each($severityPie)) {
+                foreach ($severityPie as $key => $severityData) {
                     $name = isset($severityData['severity']) ? $severity[$severityData['severity']] : 'Unknow';
                     $count = isset($severityData['severity_percent']) ? $severityData['severity_percent'] : 0;
                     $url = isset($severityData['severity']) ? "index.php?severity=" .$severityData['severity'] : null;
@@ -367,6 +367,7 @@ require_once("../filterprocessing.php");
          <br />
 
          <div class="dashchartLarge">
+            <div class="button"><button class="button-reset">Reset Zoom</button></div>
             <div class="ChartTitleLarge">Events action over time (Total: <?PHP print number_format($eventsCount); ?>)</div>
             <div class="ChartBodyLarge" id="chartEvents"></div>
             <div class="ChartBottomLarge"></div>
@@ -405,7 +406,7 @@ require_once("../filterprocessing.php");
             $.jqplot.config.errorFontFamily = 'Courier New';
             $.jqplot.config.errorFontSize   = '16pt';
 
-            $.jqplot('chartEvents', [chartDataPass, chartDataWarning, chartDataBlock], {
+            var eventsPlot = $.jqplot('chartEvents', [chartDataPass, chartDataWarning, chartDataBlock], {
                 stackSeries: true,
                 axesDefaults: {
                     labelRenderer: $.jqplot.CanvasAxisLabelRenderer
@@ -440,6 +441,12 @@ require_once("../filterprocessing.php");
                         }
                         ?>
                     }
+                },
+                cursor: {
+                  show: true,
+                  showTooltip: false,
+                  zoom: true,
+                  constrainZoomTo: 'x'
                 },
                 seriesDefaults: {
                     rendererOptions: {
@@ -498,7 +505,7 @@ require_once("../filterprocessing.php");
                     }
                 }
             );
-
+            $('.button-reset').click(function() { eventsPlot.resetZoom() });
          </script>
 
          <br />
@@ -628,7 +635,7 @@ require_once("../filterprocessing.php");
                         foreach($topCC as $CC) {
                             print "<tr>";
                             if ($CC['client_cc'] == "") {
-                                print "<td>Unknow</td>";
+                                print "<td>Unknown</td>";
                             } else {
                                 $countryName = geoip_record_by_name($CC['client_cc']);
                                 print "<td><a href=\"?ipcc=".$CC['client_cc']."\"> <img src=\"images/flags/png/".strtolower(headerprintnobr($CC['client_cc'])).".png\" alt=\"". headerprintnobr($CC['client_cc']) ."\" style=\"border-style: none\"> ". headerprintnobr($CC['client_cc']) ."</a></td>";

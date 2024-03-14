@@ -100,8 +100,9 @@ if ($timePreference == 'mili') {
 }
 
 // Double check to APC
+
 if ($APC_ON) {
-    $haveAPC = (extension_loaded('apc') && 1 ? true : false);
+    $haveAPC = (extension_loaded('apcu') && 1 ? true : false);
     if ($haveAPC && ini_get('apc.enabled')) {
         $APC_ON = true;
     } else {
@@ -173,7 +174,7 @@ function statsEventSensor()
 
     // Query for events
     $selector = 'SELECT COUNT(events.sensor_id) AS sensor_count, events.sensor_id as sensor_id FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
 
@@ -275,7 +276,7 @@ function statsEvents()
     }
     // Query for events
     $selector = 'SELECT events.a_timestamp as a_timestamp, COUNT(events.h_action_status = 20 OR NULL) AS warning, COUNT(events.h_action_status < 10 OR NULL) AS block, COUNT(events.h_action_status >= 10 AND events.h_action_status < 20 OR NULL) AS allow FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
     // SQL Query trailer
@@ -318,7 +319,7 @@ function statsTopRules()
     // Check if join table are needed
     if ((isset($_SESSION[$filterType]['ruleid']) AND !isset($_SESSION[$filterType]['Not_ruleid'])) OR isset($_SESSION[$filterType]['tag'])) {
         $selector = 'SELECT COUNT( events_messages.h_message_ruleId ) AS rule_count, events_messages.h_message_ruleId AS message_ruleId FROM date_range, events ';
-        if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+        if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
             $selector = $selector . 'USE INDEX '.$filterIndexHint;
         }        
     } else {
@@ -362,7 +363,7 @@ function statsTopSources()
     
     // Query for events
     $selector = 'SELECT COUNT( events.a_client_ip ) AS source_count, INET_NTOA(events.a_client_ip) AS client_ip FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
     // SQL Query trailer
@@ -396,7 +397,7 @@ function statsTopTargets()
     
     // Query for events
     $selector = 'SELECT COUNT( events.b_host ) AS host_count, events.b_host FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
     // SQL Query trailer
@@ -430,7 +431,7 @@ function statsTopStatus()
     
     // Query for events
     $selector = 'SELECT COUNT( events.f_status ) AS status_count, events.f_status AS status, http_code.msg AS msg FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }    
     $selector = $selector . 'JOIN http_code ON http_code.code=events.f_status ';
@@ -490,7 +491,7 @@ function statsTopSeverity()
     global $filterIndexHint;
     
     $selector = 'SELECT COUNT( events.h_severity ) AS severity_count, events.h_severity AS severity FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }  
     $selector = $selector . ' JOIN http_code ON http_code.code=events.f_status ';
@@ -539,7 +540,7 @@ function statsTopPath()
     
     // Query for events
     $selector = 'SELECT COUNT( events.b_path ) AS b_path_count, b_path FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }      
 
@@ -574,7 +575,7 @@ function statsTopCC()
     
     // Query for events
     $selector = 'SELECT COUNT( events.a_client_ip_cc ) AS client_cc_count, a_client_ip_cc AS client_cc FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }  
     // SQL Query trailer
@@ -607,7 +608,7 @@ function statsTopASN()
     
     // Query for events
     $selector = 'SELECT COUNT( events.a_client_ip_asn ) AS client_ASN_count, a_client_ip_asn AS client_ASN  FROM date_range, events  ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }  
     // SQL Query trailer
@@ -655,7 +656,7 @@ function checkUser($username, $password)
 
     $sha1Password = sha1($password);
 
-    $sqlcheckUser = 'SELECT `user_id`, `username`, `email` FROM users WHERE username = :username AND password = :password';
+    $sqlcheckUser = 'SELECT `user_id`, `username`, `email`, `admin` FROM users WHERE username = :username AND password = :password';
     if ($DEBUG) {
         $debugInfo[__FUNCTION__][$debugCount]['query'] = $sqlcheckUser;
     }
@@ -709,8 +710,8 @@ function getTagID($tag_string)
     global $dbconn;
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($tag_id = apc_fetch('tag_'.sha1($tag_string)))) {
+    
+    if ($APC_ON AND ($tag_id = apcu_fetch('tag_'.sha1($tag_string)))) {
         $tag_id = $tag_id;
     } else {
         $sqlGetTagId = '
@@ -743,9 +744,11 @@ function getTagID($tag_string)
                     if ($tag_string == $Tag['tag_name']) {
                         $tag_id = $Tag['tag_id'];
                     }
+                    
                     if ($APC_ON) {
-                        apc_store('tag_'.sha1($Tag['tag_name']), $Tag['tag_id'], $CACHE_TIMEOUT);
+                        apcu_store('tag_'.sha1($Tag['tag_name']), $Tag['tag_id'], $CACHE_TIMEOUT);
                     }
+                    
                 }
                 // if no tag found, a custom tag will be created on tags_custom table
                 if (!isset($tag_id) OR $tag_id == "") {
@@ -762,9 +765,11 @@ function getTagID($tag_string)
                         $tag_id = $dbconn->lastInsertId();
                         $insertStatus = $queryNewTag_sth->errorCode();
                         $arr = $queryNewTag_sth->errorInfo();
+                        
                         if ($APC_ON) {
-                            apc_store('tag_'.sha1($tag_name), $tag_id, $CACHE_TIMEOUT);
+                            apcu_store('tag_'.sha1($tag_name), $tag_id, $CACHE_TIMEOUT);
                         }
+                        
                     } catch (PDOException $e) {
                        header("HTTP/1.1 500 Internal Server Error");
                        header("Status: 500");
@@ -814,8 +819,8 @@ function getTagName($tag_id)
     global $dbconn;
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($tag_name = apc_fetch('tag_'.$tag_id))) {
+    
+    if ($APC_ON AND ($tag_name = apcu_fetch('tag_'.$tag_id))) {
         $tag_name = $tag_name;
     } else {
         $sqlGetTagName = '
@@ -828,8 +833,8 @@ function getTagName($tag_id)
         }
         try {
             $query_sth = $dbconn->prepare($sqlGetTagName);
-            $query_sth->bindParam(":tag_id", $tag_id);
-            $query_sth->bindParam(":tag_idCustom", $tag_id);
+            //$query_sth->bindParam(":tag_id", $tag_id);
+            //$query_sth->bindParam(":tag_idCustom", $tag_id);
             // Execute the query
             $query_sth->execute();
             $GetTagName = $query_sth->fetchAll(PDO::FETCH_ASSOC);
@@ -837,15 +842,17 @@ function getTagName($tag_id)
                 if ($tag_id == $Tag['tag_id']) {
                     $tag_name = $Tag['tag_name'];
                 }
+                
                 if ($APC_ON) {
                 //    apc_store('tag_'.$tag_id, $Tag['tag_name'], $CACHE_TIMEOUT);
                 print "";
                 }
+                
             }
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
            header("Status: 500");
-           print "HTTP/1.1 500 Internal Server Error \n";
+           print "HTTP/1.1 500 Internal Server Error\n";
            if ($DEBUG) {
                print "Error (".__FUNCTION__.") Message: " . $e->getMessage() . "\n";
                print "Error (".__FUNCTION__.") getTraceAsString: " . $e->getTraceAsString() . "\n";
@@ -876,10 +883,10 @@ function getTags()
     global $dbconn;
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($tags = apc_fetch('tags'))) {
+    
+    if ($APC_ON AND ($tags = apcu_fetch('tags'))) {
         $tags = $tags;
-    } else {
+    } else { 
         $sqlGetTags = ' SELECT `tag_id`, `tag_name`  FROM `tags`
                         UNION
                         SELECT `tag_id`, `tag_name`  FROM `tags_custom`
@@ -894,12 +901,12 @@ function getTags()
             $query_sth->execute();
             $tagsList = $query_sth->fetchAll(PDO::FETCH_ASSOC);
             $queryStatus = $query_sth->errorCode();
-            /*
+            
             if ($APC_ON) {
            //     apc_store('tags', $tagsList, $CACHE_TIMEOUT);
                 print "";
             }
-            */
+            
 
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
@@ -1565,7 +1572,6 @@ function eventFilter($offset, $maxnumber, $eventCount)
     /* prepare statement using PDO*/
     global $dbconn;
     $filterType = 'filter';
-
     if ($eventCount == 0) {
         $totalevents = eventFilterCount($filterType);
     } else {
@@ -1574,7 +1580,6 @@ function eventFilter($offset, $maxnumber, $eventCount)
 
 
     $sqlCreateTempTable='CREATE TEMPORARY TABLE IF NOT EXISTS `list_events` (`event_id` int(10) unsigned NOT NULL)';
-
     try {
         $sthTempTable = $dbconn->prepare($sqlCreateTempTable);
 
@@ -1590,17 +1595,18 @@ function eventFilter($offset, $maxnumber, $eventCount)
        }
        exit();
     }
-
+    
     // Query for events
     $selector = 'INSERT INTO list_events(event_id) SELECT DISTINCT events.event_id FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
     // SQL Query trailer
     $trailer = ' ORDER BY events.event_id DESC,events.a_timestamp DESC LIMIT '.(($offset-1)*$maxnumber).", $maxnumber";
-
+    
     // Call superFilter to filter and get the events
     $eventCount = superFilter($selector, $trailer, $filterType, TRUE);
+
     if ($eventCount > 0) {
         $sqlFetchEvents = 'SELECT events.event_id, events.sensor_id, events.a_timestamp, events.a_uniqid, INET_NTOA(events.a_client_ip) AS a_client_ip,  events.a_client_port, INET_NTOA(events.a_server_ip) AS a_server_ip, events.a_server_port,  events.b_method, events.b_path, events.b_path_parameter, events.b_protocol, events.b_host, events.f_protocol, events.f_status, events.f_msg, events.f_content_length, events.f_connection, events.f_content_type, events.h_severity, events.h_Interception_phase, events.h_action_status, events.h_action_status_msg FROM list_events, events WHERE events.event_id = list_events.event_id';
 
@@ -1627,7 +1633,6 @@ function eventFilter($offset, $maxnumber, $eventCount)
         }
 
         $event_loop = 0;
-
         // Get the events messages
         $sql = 'SELECT DISTINCT h_message_ruleId, rule_message.message_ruleMsg AS h_message_ruleMsg, h_message_ruleData, h_message_ruleSeverity, h_message_action FROM events_messages JOIN rule_message ON events_messages.h_message_ruleId = rule_message.message_ruleid WHERE events_messages.event_id = :ruleid ORDER BY h_message_ruleSeverity ASC, h_message_ruleId ASC';
 
@@ -1678,7 +1683,7 @@ function eventFilter($offset, $maxnumber, $eventCount)
 }
 
 function eventFilterCount($filterType = 'filter')
-{
+{   
     global $DEBUG;
     if ($DEBUG) {
         global $debugInfo;
@@ -1686,14 +1691,13 @@ function eventFilterCount($filterType = 'filter')
         $starttime = microtime(true);
     }
     global $filterIndexHint;
-    
     // Query for events
     if ((isset($_SESSION[$filterType]['ruleid']) AND !isset($_SESSION[$filterType]['Not_ruleid'])) OR isset($_SESSION[$filterType]['tag'])) {
         $selector = 'SELECT count(distinct events.event_id) as eventsCount FROM date_range, events ';
     } else {
         $selector = 'SELECT count(events.event_id) as eventsCount FROM date_range, events ';
     }
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
     $numargs = func_num_args();
@@ -1743,7 +1747,7 @@ function eventFilterAround()
 
     // Query for events
     $selector = 'SELECT events.event_id FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
 
@@ -1825,7 +1829,7 @@ function deleteEventsByFilter()
 
     // Query for delete events
     $selector = 'INSERT INTO delete_event(event_id2delete) SELECT events.event_id as event_id FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
 
@@ -1913,7 +1917,7 @@ function falsePositiveByFilter()
 
     // Query to mark false positive events
     $selector = 'INSERT INTO fp_event(event_id2fp) SELECT events.event_id as event_id FROM date_range, events ';
-    if (count($_SESSION['filterIndexHint']) > 0 and $_SESSION['filterIndexHint'] != false) {
+    if (isset($_SESSION['filterIndexHint']) and count($_SESSION['filterIndexHint']) > 0) {
         $selector = $selector . 'USE INDEX '.$filterIndexHint;
     }
     // SQL Query trailer
@@ -2020,7 +2024,7 @@ function getUsers()
     try {
         if (func_num_args() == 1 ) {
             $user = func_get_arg(0);
-            $sqlGetUsers  = 'SELECT `user_id`, `username`, `email` FROM users WHERE user_id = :userid LIMIT 1';
+            $sqlGetUsers  = 'SELECT `user_id`, `username`, `email`, `admin` FROM users WHERE user_id = :userid LIMIT 1';
             $query_sth = $dbconn->prepare($sqlGetUsers);
             $query_sth->bindParam(":userid", $user);
         } else {
@@ -2434,14 +2438,10 @@ function deleteSensor($sensor_id)
        exit();
     }
 
-   if ($APC_ON) {
-	   if (phpversion('apcu')) {
-		  apc_clear_cache();   
-	   } elseif (phpversion('apc')) {
-	      apc_clear_cache('user');   
-	   }
-   }
-
+    if ($APC_ON) {
+        apcu_clear_cache();   
+    }
+   
    if ($DEBUG) {
       $stoptime                         = microtime(true);
       $timespend                        = $stoptime - $starttime;
@@ -2470,7 +2470,7 @@ function saveSensor($sensorToSave, $sensorName, $sensorIp, $sensorDescription, $
     global $APC_ON;
 
     if ($sensorToSave == "new") {
-        $sql = 'INSERT `sensors` SET `name` = :name,`password` = :pass, `IP` = :ip, `description` = :description, `type` = :type, `client_ip_via` = :clientIpInHeader, `client_ip_header` = :clientIpHeader ';        
+        $sql = 'INSERT INTO `sensors` (`name`, `password`,`IP`, `description`, `type`, `client_ip_via`, `client_ip_header`) VALUES (:name, :pass, :ip, :description, :type, :clientIpInHeader, :clientIpHeader)';        
     } else {
         if ($sensorPass != "") {
             $sql = 'UPDATE `sensors` SET `name` = :name,`password` = :pass, `IP` = :ip, `description` = :description, `type` = :type, `client_ip_via` = :clientIpInHeader, `client_ip_header` = :clientIpHeader  WHERE `sensors`.`sensor_id` = :id';
@@ -2508,13 +2508,11 @@ function saveSensor($sensorToSave, $sensorName, $sensorIp, $sensorDescription, $
        }
        exit();
     }
+    
     if ($APC_ON) {
-	   if (phpversion('apcu')) {
-		  apc_clear_cache();   
-	   } elseif (phpversion('apc')) {
-	      apc_clear_cache('user');   
-	   }
+        apcu_clear_cache();   
     }
+    
     if ($DEBUG) {
         $stoptime = microtime(true);
         $timespend = $stoptime - $starttime;
@@ -2569,13 +2567,11 @@ function disableEnableSensor($sensorToDisable, $status)
        }
        exit();
     }
+    
     if ($APC_ON) {
-	   if (phpversion('apcu')) {
-		  apc_clear_cache();   
-	   } elseif (phpversion('apc')) {
-	      apc_clear_cache('user');   
-	   }
+        apcu_clear_cache();   
     }
+    
     if ($DEBUG) {
         $stoptime = microtime(true);
         $timespend = $stoptime - $starttime;
@@ -2643,7 +2639,7 @@ function deleteUser($user_id)
     return $deluser;
 }
 
-function userSave($userToSave, $userName, $userEmail, $userPassword)
+function userSave($userToSave, $userName, $userEmail, $userPassword, $userAdmin)
 {
     global $DEBUG;
     global $DEMO;
@@ -2660,12 +2656,12 @@ function userSave($userToSave, $userName, $userEmail, $userPassword)
     global $dbconn;
 
     if ($userToSave == "new") {
-        $sql = 'INSERT `users` SET `username` = :username,`password` = :pass, `email` = :email ';
+        $sql = 'INSERT INTO `users` (`username`, `password`, `email`, `admin`) VALUES (:username, :pass, :email, :admin)';
     } else {
         if ($userPassword != '' AND $userName == '' AND $userEmail == '') {
             $sql = 'UPDATE `users` SET `password` = :pass WHERE `users`.`user_id` = :id';
         } else {
-            $sql = 'UPDATE `users` SET `username` = :username, `email` = :email WHERE `users`.`user_id` = :id';
+            $sql = 'UPDATE `users` SET `username` = :username, `email` = :email, `admin` = :admin  WHERE `users`.`user_id` = :id';
         }
     }
     if ($DEBUG) {
@@ -2678,16 +2674,18 @@ function userSave($userToSave, $userName, $userEmail, $userPassword)
             $sth->bindParam(":pass", $userPassword);
             $sth->bindParam(":username", $userName);
             $sth->bindParam(":email", $userEmail);
+            $sth->bindParam(":admin", $userAdmin);
         } else {
-           $sth->bindParam(":id", $userToSave);
-           if ($userPassword != '' AND $userName == '' AND $userEmail == '') {
-               $userPassword = sha1($userPassword);
-               $sth->bindParam(":pass", $userPassword);
-           } else {
-               $sth->bindParam(":username", $userName);
-               $sth->bindParam(":email", $userEmail);
-           }
-         }
+            $sth->bindParam(":id", $userToSave);
+            if ($userPassword != '' AND $userName == '' AND $userEmail == '') {
+                $userPassword = sha1($userPassword);
+                $sth->bindParam(":pass", $userPassword);
+            } else {
+                $sth->bindParam(":username", $userName);
+                $sth->bindParam(":email", $userEmail);
+                $sth->bindParam(":admin", $userAdmin);
+            }
+        }
         // Execute the query
         $sth->execute();
         $queryStatus = $sth->errorCode();
@@ -2696,14 +2694,14 @@ function userSave($userToSave, $userName, $userEmail, $userPassword)
         }
 
     } catch (PDOException $e) {
-       header("HTTP/1.1 500 Internal Server Error");
-       header("Status: 500");
-       print "HTTP/1.1 500 Internal Server Error \n";
-       if ($DEBUG) {
-           print "Error (".__FUNCTION__.") Message: " . $e->getMessage() . "\n";
-           print "Error (".__FUNCTION__.") getTraceAsString: " . $e->getTraceAsString() . "\n";
-       }
-       exit();
+        header("HTTP/1.1 500 Internal Server Error");
+        header("Status: 500");
+        print "HTTP/1.1 500 Internal Server Error \n";
+        if ($DEBUG) {
+            print "Error (".__FUNCTION__.") Message: " . $e->getMessage() . "\n";
+            print "Error (".__FUNCTION__.") getTraceAsString: " . $e->getTraceAsString() . "\n";
+        }
+        exit();
     }
 
     if ($DEBUG) {
@@ -2780,12 +2778,12 @@ function getSensorName($sensor_id)
     }
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($sensor = apc_fetch('sensorName_'.$sensor_id))) {
+    
+    if ($APC_ON AND ($sensor = apcu_fetch('sensorName_'.$sensor_id))) {
         if ($DEBUG) {
             $debugInfo[__FUNCTION__]['cache'] = 1;
         }
-    } else {
+    } else { 
         global $dbconn;
         try {
             if ($DEMO) {
@@ -2811,11 +2809,11 @@ function getSensorName($sensor_id)
             if ($queryStatus != 0) {
                 return FALSE;
             } elseif ($APC_ON) {
-                apc_store('sensorName_'.$sensor_id, $sensor, $CACHE_TIMEOUT);
+                apcu_store('sensorName_'.$sensor_id, $sensor, $CACHE_TIMEOUT);
                 if ($DEBUG) {
                     $debugInfo[__FUNCTION__]['cache'] = 0;
                 }
-            }
+            } 
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
            header("Status: 500");
@@ -2849,8 +2847,8 @@ function getSensorInfo($sensor_id)
     global $dbconn;
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ( $APC_ON AND $sensorInfo = apc_fetch('sensorInfo_'.$sensor_id)) {
+    
+    if ( $APC_ON AND $sensorInfo = apcu_fetch('sensorInfo_'.$sensor_id)) {
         if ($DEBUG) {
             $debugInfo[__FUNCTION__]['cache'] = 1;
         }
@@ -2916,9 +2914,9 @@ function getSensorInfo($sensor_id)
          $sensorInfoResult = array('a_date' => '', 'h_producer' => '', 'h_producer_ruleset' => '', 'h_server' => '');
       }
       $sensorInfo = array_merge($sensorEventsCount, $sensorInfoResult);
-       if ($APC_ON) {
-          apc_store('sensorInfo_'.$sensor_id, $sensorInfo, $CACHE_TIMEOUT*3);
-       }
+        if ($APC_ON) {
+            apcu_store('sensorInfo_'.$sensor_id, $sensorInfo, $CACHE_TIMEOUT*3);
+        }
       }
     if ($DEBUG) {
         $stoptime = microtime(true);
@@ -2948,15 +2946,15 @@ function sensorLogin($ip, $loginpass64, $login, $pass) {
     $remoteAddrLong = sprintf("%u", ip2long($ip));
 
     // if the sensor credential are cache use it
-    if ( $APC_ON AND apc_fetch($login.'_'.$pass) AND ($remoteAddrLong >= apc_fetch($login.'_'.$pass.'_ipstart') AND $remoteAddrLong <= apc_fetch($login.'_'.$pass.'_ipend')) OR (is_null(apc_fetch($login.'_'.$pass.'_ipstart')) AND is_null(apc_fetch($login.'_'.$pass.'_ipend'))) ) {
+    if ( $APC_ON AND apcu_fetch($login.'_'.$pass) AND ($remoteAddrLong >= apcu_fetch($login.'_'.$pass.'_ipstart') AND $remoteAddrLong <= apcu_fetch($login.'_'.$pass.'_ipend')) OR (is_null(apcu_fetch($login.'_'.$pass.'_ipstart')) AND is_null(apcu_fetch($login.'_'.$pass.'_ipend'))) ) {
         $login_result['status'] = 1;
-        $login_result['sensor_id'] = apc_fetch($login.'_'.$pass);
-        $login_result['sensor_client_ip_header'] = apc_fetch($login.'_'.$pass.'_ip_header');
+        $login_result['sensor_id'] = apcu_fetch($login.'_'.$pass);
+        $login_result['sensor_client_ip_header'] = apcu_fetch($login.'_'.$pass.'_ip_header');
         $login_result['sensor_name'] = $login;
         if ($DEBUG) {
             $debugInfo[__FUNCTION__]['cache'] = 1;
         }
-    } else {
+    } else { 
         $sql = "SELECT sensor_id, name, IP, client_ip_via, client_ip_header FROM sensors WHERE status = 'Enabled' AND name LIKE :loginname AND password LIKE :password LIMIT 0 , 1";
         if ($DEBUG) {
             $debugInfo[__FUNCTION__][$debugCount]['query']  = $sql;
@@ -2977,15 +2975,16 @@ function sensorLogin($ip, $loginpass64, $login, $pass) {
 
 
             if (($count > 0) AND (($remoteAddrLong >= $iprange['networklong']) AND ($remoteAddrLong <= $iprange['broadcastlong']) OR is_null($sensorData[0]['IP']) ) ) {
+                
                 if ($APC_ON) {
-                    apc_store($login.'_'.$pass, $sensor_id, $CACHE_TIMEOUT);
-                    apc_store($login.'_'.$pass.'_ip_header', $sensor_client_ip_header, $CACHE_TIMEOUT);
+                    apcu_store($login.'_'.$pass, $sensor_id, $CACHE_TIMEOUT);
+                    apcu_store($login.'_'.$pass.'_ip_header', $sensor_client_ip_header, $CACHE_TIMEOUT);
                     if (is_null($sensorData[0]['IP'])) {
-                        apc_store($login.'_'.$pass.'_ipstart', $sensorData[0]['IP'], $CACHE_TIMEOUT);
-                        apc_store($login.'_'.$pass.'_ipend', $sensorData[0]['IP'], $CACHE_TIMEOUT);
+                        apcu_store($login.'_'.$pass.'_ipstart', $sensorData[0]['IP'], $CACHE_TIMEOUT);
+                        apcu_store($login.'_'.$pass.'_ipend', $sensorData[0]['IP'], $CACHE_TIMEOUT);
                     } else {
-                        apc_store($login.'_'.$pass.'_ipstart', $iprange['networklong'], $CACHE_TIMEOUT);
-                        apc_store($login.'_'.$pass.'_ipend', $iprange['broadcastlong'], $CACHE_TIMEOUT);
+                        apcu_store($login.'_'.$pass.'_ipstart', $iprange['networklong'], $CACHE_TIMEOUT);
+                        apcu_store($login.'_'.$pass.'_ipend', $iprange['broadcastlong'], $CACHE_TIMEOUT);
                     }
                 }
                 $login_result['status']      = 1;
@@ -3032,8 +3031,8 @@ function getSensors()
     global $dbconn;
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($sensors = apc_fetch('sensors'))) {
+    
+    if ($APC_ON AND ($sensors = apcu_fetch('sensors'))) {
         $sensors = $sensors;
     } else {
         $sql = 'SELECT `sensors`.`sensor_id` as sensor_id, `sensors`.`name` as name, `sensors`.`IP` as IP, `sensors`.`description` as description, `sensors`.`type` as type, `sensors_type`.`description` as type_description, `sensors`.`status` as status FROM `sensors` JOIN `sensors_type` ON `sensors`.`type` = `sensors_type`.`type` ORDER BY name';
@@ -3045,9 +3044,11 @@ function getSensors()
             // Execute the query
             $sth->execute();
             $sensors = $sth->fetchAll(PDO::FETCH_ASSOC);
+            
             if ($APC_ON) {
-                apc_store('sensors', $sensors, $CACHE_TIMEOUT);
+                apcu_store('sensors', $sensors, $CACHE_TIMEOUT);
             }
+            
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
            header("Status: 500");
@@ -3121,8 +3122,8 @@ function getRuleName($rule_id)
     }
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($ruleName = apc_fetch('ruleId_'.$rule_id))) {
+    
+    if ($APC_ON AND ($ruleName = apcu_fetch('ruleId_'.$rule_id))) {
         if ($DEBUG) {
             $debugInfo[__FUNCTION__]['cache'] = 1;
         }
@@ -3148,7 +3149,7 @@ function getRuleName($rule_id)
             if ($queryStatus != 0) {
                 return FALSE;
             } elseif ($APC_ON) {
-                apc_store('ruleId_'.$rule_id, $ruleName, $CACHE_TIMEOUT);
+                apcu_store('ruleId_'.$rule_id, $ruleName, $CACHE_TIMEOUT);
                 if ($DEBUG) {
                     $debugInfo[__FUNCTION__]['cache'] = 0;
                 }
@@ -3239,7 +3240,7 @@ function getWebHostID($host)
     global $CACHE_TIMEOUT;
     $host = strtolower($host);
     
-    if ($APC_ON AND ($webHostID = apc_fetch('webhosts_'.$host))) {
+    if ($APC_ON AND ($webHostID = apcu_fetch('webhosts_'.$host))) {
         $webHostID = $webHostID;
     } else {
         $sql = 'SELECT `host_id` FROM `events_hostname` WHERE `hostname` = :host';
@@ -3277,9 +3278,9 @@ function getWebHostID($host)
             }
             
             if ($APC_ON) {
-                apc_store('webhosts_'.$host, $webHostID, $CACHE_TIMEOUT);
+                apcu_store('webhosts_'.$host, $webHostID, $CACHE_TIMEOUT);
             }
-
+            
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
            header("Status: 500");
@@ -3318,7 +3319,8 @@ function getWebHostName($hostId)
     if (!is_numeric($hostId)) {
         return FALSE;
     }
-    if ($APC_ON AND ($webHostName = apc_fetch('webHostName_'.$hostId))) {
+    
+    if ($APC_ON AND ($webHostName = apcu_fetch('webHostName_'.$hostId))) {
         $webHostName = $webHostName;
     } else {
         $sql = 'SELECT `hostname` FROM `events_hostname` WHERE `host_id` = :hostid LIMIT 1';
@@ -3333,9 +3335,11 @@ function getWebHostName($hostId)
             $webHostName = $sth->fetch(PDO::FETCH_ASSOC);
             $webHostName = $webHostName['hostname'];
             $sth->closeCursor();
+            
             if ($APC_ON) {
-                apc_store('webHostName_'.$hostId, $webHostName, $CACHE_TIMEOUT);
+                apcu_store('webHostName_'.$hostId, $webHostName, $CACHE_TIMEOUT);
             }
+            
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
            header("Status: 500");
@@ -3418,10 +3422,10 @@ function getWebHosts()
     global $dbconn;
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($webhosts = apc_fetch('webhosts'))) {
+    
+    if ($APC_ON AND ($webhosts = apcu_fetch('webhosts'))) {
         $webhosts = $webhosts;
-    } else {
+    } else { 
         $sql = 'SELECT `host_id`, `hostname` FROM `events_hostname` ORDER BY `hostname`';
         if ($DEBUG) {
             $debugInfo[__FUNCTION__][$debugCount]['query'] = $sql;
@@ -3432,9 +3436,11 @@ function getWebHosts()
             // Execute the query
             $sth->execute();
             $webhosts = $sth->fetchAll(PDO::FETCH_ASSOC);
+            
             if ($APC_ON) {
-                apc_store('webhosts', $webhosts, $CACHE_TIMEOUT);
+                apcu_store('webhosts', $webhosts, $CACHE_TIMEOUT);
             }
+            
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
            header("Status: 500");
@@ -3585,10 +3591,10 @@ function getStatusList()
     global $dbconn;
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($httpStatus = apc_fetch('httpStatus'))) {
+    
+    if ($APC_ON AND ($httpStatus = apcu_fetch('httpStatus'))) {
         $httpStatus = $httpStatus;
-    } else {
+    } else { 
         $sql = 'SELECT http_code.code AS code, http_code.msg AS msg FROM http_code';
         if ($DEBUG) {
             $debugInfo[__FUNCTION__][$debugCount]['query'] = $sql;
@@ -3600,9 +3606,11 @@ function getStatusList()
             $sth->execute();
 
             $httpStatus = $sth->fetchAll(PDO::FETCH_ASSOC);
+            
             if ($APC_ON) {
-                apc_store('httpStatus', $httpStatus, $CACHE_TIMEOUT);
+                apcu_store('httpStatus', $httpStatus, $CACHE_TIMEOUT);
             }
+            
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
            header("Status: 500");
@@ -3638,13 +3646,13 @@ function getMethodList()
     global $dbconn;
     global $APC_ON;
     global $CACHE_TIMEOUT;
-
-    if ($APC_ON AND ($httpMethod = apc_fetch('httpMethod'))) {
+    
+    if ($APC_ON AND ($httpMethod = apcu_fetch('httpMethod'))) {
         $httpMethod = $httpMethod;
         if ($DEBUG) {
             $debugInfo[__FUNCTION__]['cache'] = 1;
         }
-    } else {
+    } else { 
         $sql = 'SELECT DISTINCT `b_method` FROM `events`';
         if ($DEBUG) {
             $debugInfo[__FUNCTION__][$debugCount]['query'] = $sql;
@@ -3659,9 +3667,11 @@ function getMethodList()
             $sth->execute();
 
             $httpMethod = $sth->fetchAll(PDO::FETCH_ASSOC);
+            
             if ($APC_ON) {
-                apc_store('httpMethod', $httpMethod, $CACHE_TIMEOUT);
+                apcu_store('httpMethod', $httpMethod, $CACHE_TIMEOUT);
             }
+            
         } catch (PDOException $e) {
            header("HTTP/1.1 500 Internal Server Error");
            header("Status: 500");

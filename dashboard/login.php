@@ -40,6 +40,7 @@ if ($_POST['submit'] == "submit") {
             $_SESSION['userName'] = ucfirst(strtolower($userlogon[0]['username']));
             $_SESSION['userID']   = $userlogon[0]['user_id'];
             $_SESSION['email']    = $userlogon[0]['email'];
+            $_SESSION['admin']    = $userlogon[0]['admin'];
             $_SESSION['LAST_ACTIVITY'] = time(); // define first "last activity" timestamp
             $_SESSION['CREATED'] = time(); // initialize the session create timestamp
 

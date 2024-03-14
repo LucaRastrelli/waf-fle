@@ -26,6 +26,12 @@ if ($DEBUG) {
 }
 $pagId = 'management';
 require_once "../session.php";
+
+if($_SESSION['admin'] == 0) {
+    header('Location: index.php');
+    exit;
+}
+
 require_once "../header.php";
 
 if (isset($_GET['sensorInfo'])) {  // Runtime sensor info enable/disable
@@ -198,6 +204,12 @@ if (isset($_GET['s'])) {  // Sensors Tasks
     do if (isset($_POST['Edit']) AND $_POST['Edit'] == "Save" AND $_POST['User'] != "") {
         $userToSave = @sanitize_int($_POST['User'], $min = '0');
         $userName   = @sanitize_paranoid_string($_POST['Name']);
+        if($_POST['admin'] == "on"){
+            $userAdmin = 1;
+        }
+        else {
+            $userAdmin = 0;
+        }
         if ($userName == "") {
             print "A username is needed!";
             break;
@@ -207,17 +219,17 @@ if (isset($_GET['s'])) {  // Sensors Tasks
             print "The passwords don't match!";
             break;
         }
-         if (strlen($_POST['Pass']) == 0 AND strlen($_POST['Pass2'] == 0)) {
+        if (strlen($_POST['Pass']) == 0 AND strlen($_POST['Pass2'] == 0)) {
             $userPass = '';
-         } else {
+        } else {
             $userPass = @sanitize_paranoid_string($_POST['Pass'], $min = '5', $max = '30');
-           if (!$userPass) {
-               print "Password too short, or too long.";
-               break;
-           } elseif ( preg_match('/[^a-zA-Z0-9\.\-\_\@\s]/', $_POST['Pass'])) {
-               print "Invalid caracter: use \"a-z A-Z 0-9 . - _ @ / ? = &\"";
-               break;
-           }
+            if (!$userPass) {
+                print "Password too short, or too long.";
+                break;
+            } elseif ( preg_match('/[^a-zA-Z0-9\.\-\_\@\s]/', $_POST['Pass'])) {
+                print "Invalid caracter: use \"a-z A-Z 0-9 . - _ @ / ? = &\"";
+                break;
+            }
         }
         $userEmail = @sanitize_paranoid_string($_POST['email']);
         if ($userEmail == "") {
@@ -227,8 +239,7 @@ if (isset($_GET['s'])) {  // Sensors Tasks
             break;
         }
         if ($userToSave) {
-
-            $userSaveResult = userSave($userToSave, $userName, $userEmail, $userPass);
+            $userSaveResult = userSave($userToSave, $userName, $userEmail, $userPass, $userAdmin);
             if (!$userSaveResult) {
                 print $userSaveResult;
             }
@@ -261,9 +272,18 @@ if (isset($_GET['s'])) {  // Sensors Tasks
             print "Invalid email address";
             break;
         }
+        $userAdmin = @sanitize_paranoid_string($_POST['admin']);
+        if ($userAdmin == "") {
+            $userAdmin = 0;
+        } elseif ($userAdmin == 'on') {
+            $userAdmin = 1;
+        } else {
+            print "Invalid input admin";
+            break;
+        }
         $userToSave = "new";
         if ($userToSave) {
-            $userSaveResult = userSave($userToSave, $userName, $userEmail, $userPass);
+            $userSaveResult = userSave($userToSave, $userName, $userEmail, $userPass, $userAdmin);
             if (!$userSaveResult) {
                 print $userSaveResult;
             }
@@ -329,6 +349,9 @@ if (isset($_GET['u'])) {
         print "</tr><tr>";
         print "<td>e-mail</td><td><input type=\"text\" name=\"email\" value=\"" . $user[0]['email'] . "\"></td>";
         print "</tr>";
+        print "<td>Admin</td><td><input type=\"checkbox\" name=\"admin\""; 
+        if($user[0]['admin']) print "checked";
+        print "></td></tr>";
         print "<tr>&nbsp;</tr>";
         print "<tr><td>";
         print "<input type=\"submit\" name=\"Edit\" value=\"Save\">";
@@ -344,6 +367,9 @@ if (isset($_GET['u'])) {
          print "<td>Password (confirmation)</td><td><input type=\"password\" name=\"Pass2\" value=\"\"> (Min. 5 - Max. 20 characters)</td>";
          print "</tr><tr>";
          print "<td>e-mail</td><td><input type=\"text\" name=\"email\" value=\"\"></td>";
+         print "</tr>";
+         print "<tr>&nbsp;</tr>";
+         print "<td>Admin</td><td><input type=\"checkbox\" name=\"admin\"></td>";
          print "</tr>";
          print "<tr>&nbsp;</tr>";
          print "<tr><td>";
@@ -410,13 +436,11 @@ if (isset($_GET['u'])) {
    print "</tr>";
    
    print "<tr>";
-      print "<td><span id=\"header_cap\">APC Cache extension:</span></td><td> ";
+      print "<td><span id=\"header_cap\">APCu Cache extension:</span></td><td> ";
       
          if (extension_loaded('apcu')) {
             print "Extension APCu (" . phpversion('apcu') . ") loaded, ";
-         } elseif (extension_loaded('apc')) {
-			 print "Extension APCu (" . phpversion('apc') . ") loaded, ";
-		 }
+         }
          if (ini_get('apc.enabled')) {
             print "enabled ";
          }
@@ -429,7 +453,7 @@ if (isset($_GET['u'])) {
    print "</tr>";
    if ($APC_ON) {
    print "<tr>";
-      print "<td><span id=\"header_cap\">APC Cache Timeout:</span></td><td> $CACHE_TIMEOUT seconds</td>";
+      print "<td><span id=\"header_cap\">APCu Cache Timeout:</span></td><td> $CACHE_TIMEOUT seconds</td>";
    print "</tr>";
    }
    print "<tr>";
