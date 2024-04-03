@@ -1,5 +1,19 @@
 WAF-FLE ChangeLog
 
+Version 0.7.0: April, 03 2024
+-------------
+Fixed Bugs:
+
+Improvements:
+- Compatible with PHP 8.x
+- Removed APC references, now it supports only APCu
+- Updated SQL queries
+
+New Feature:
+- When creating a new user, it is possible to define if it is an admin
+  or not. Not-admin users can't access the Management section.
+- In Events action over time graph, it is now possible to zoom in and
+  zoom out.  
 
 Version 0.6.4: Jul, 25 2014
 -------------
