@@ -59,7 +59,7 @@ if (isset($SETUP) AND $SETUP == true ){
     exit;
 }
 
-$waffleVersion = '0.6.4';
+$waffleVersion = '0.7.0';
 // Set PHP default timezone as system timezone, need to avoid warning messages in PHP 5.3+
 date_default_timezone_set(@date_default_timezone_get());
 /* Constants   */
@@ -823,10 +823,9 @@ function getTagName($tag_id)
     if ($APC_ON AND ($tag_name = apcu_fetch('tag_'.$tag_id))) {
         $tag_name = $tag_name;
     } else {
-        $sqlGetTagName = '
-                        SELECT `tag_id`, `tag_name` FROM `tags`
-                        UNION
-                        SELECT `tag_id`, `tag_name` FROM `tags_custom`
+        $sqlGetTagName = '  SELECT `tag_id`, `tag_name` FROM `tags`
+                            UNION
+                            SELECT `tag_id`, `tag_name` FROM `tags_custom`
                         ';
         if ($DEBUG) {
                 $debugInfo[__FUNCTION__][$debugCount]['query'] = $sqlGetTagName;

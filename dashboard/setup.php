@@ -1,11 +1,11 @@
 <html>
 <head><title>WAF-FLE Setup</title></head>
 <body>
-<h1>WAF-FLE 0.6 Setup</h1>
+<h1>WAF-FLE 0.7 Setup</h1>
 <p>
 
 <?PHP
-$waffleVersion = '0.6.0';
+$waffleVersion = '0.7.0';
 
 // variable init
 $databaseSchema="/usr/local/waf-fle/extra/waffle.mysql";
