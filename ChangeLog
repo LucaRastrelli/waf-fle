@@ -1,5 +1,18 @@
 WAF-FLE ChangeLog
 
+Version 0.7.1: April, 18 2024
+-------------
+Fixed Bugs:
+- Fixed Phase A pattern for ModSecurity 2.9.4+
+- Fixed Phase B pattern for ModSecurity 2.9.4+
+- Fixed PHP bad check for variable value
+
+Improvements:
+
+
+New Feature:
+- Added HTTP/2.0 pattern
+
 Version 0.7.0: April, 03 2024
 -------------
 Fixed Bugs:

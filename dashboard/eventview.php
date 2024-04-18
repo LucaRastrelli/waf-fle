@@ -243,8 +243,8 @@ require_once("../header.php");
    <div class="wordwrap eventHeader">
    <?PHP 
        print "<a href=\"events.php?method=".headerprintnobr($event_detail['b_method'])."\" title=\"Filter by this Method\">".headerprintnobr($event_detail['b_method'])."</a> <a href=\"events.php?path=".headerprintnobr($event_detail['b_path'])."\" title=\"Click to filter for this Web Hostname\">".headerprintnobr($event_detail['b_path']) ."</a>";
-       if (isset($event_detail['b_path_parameter'])) { 
-          print "?"; 
+       if ($event_detail['b_path_parameter'] != '') { 
+            print "?"; 
        }
        print headerprintnobr($event_detail['b_path_parameter']);
 
@@ -271,7 +271,7 @@ require_once("../header.php");
          print headerprintnobr($bmatch[2]) . "<br />";
       } elseif (preg_match('/^\-\-[a-f0-9]+\-B\-\-$/i', $b_line)) {
          continue;
-      } elseif (preg_match('/(GET|POST|HEAD|PUT|DELETE)\s(.+)\s(HTTP\/[01]\.[019])/i', $b_line)) {
+      } elseif (preg_match('/(GET|POST|HEAD|PUT|DELETE)\s(.+)\s(HTTP\/[012]\.[019])/i', $b_line)) {
          continue;
       } else {
          print headerprintnobr($b_line) . " <br />";

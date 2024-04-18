@@ -107,7 +107,7 @@ while ( $line < $BodySize) {
                     $PhaseA['ServerPort'] = $matchesA[10];
                 }
                 // matching after 2.9.4
-                else if (preg_match('/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\.(\d{6})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@]{27})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',
+                else if (preg_match('/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\.(\d{6})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@\_]{27})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',
                 trim($BODY[$line]), $matchesA)) {
                     $PhaseA['Day'] = $matchesA[1];
                     $months        = array(null, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
@@ -139,7 +139,7 @@ while ( $line < $BodySize) {
             if (preg_match('/^\-\-[a-f0-9]+\-[ACEFHIKZ]\-\-$/i', trim($BODY[$line]))) {
                 break;
             } else {
-                if (preg_match('/^(GET|POST|HEAD|PUT|DELETE|TRACE|PROPFIND|OPTIONS|CONNECT|PATCH)\s(.+)\s(HTTP\/[01]\.[019])/i', trim($BODY[$line]), $matchesB)) {
+                if (preg_match('/^(GET|POST|HEAD|PUT|DELETE|TRACE|PROPFIND|OPTIONS|CONNECT|PATCH)\s(.+)\s(HTTP\/[012]\.[019])/i', trim($BODY[$line]), $matchesB)) {
                     $PhaseB['Method']        = $matchesB[1];
                     $PhaseB['pathParameter'] = parse_url("http://dummy.ex".$matchesB[2], PHP_URL_QUERY);
                     // $pathParsed              = parse_url($matchesB[2], PHP_URL_PATH);
@@ -506,6 +506,12 @@ if ($PhaseA['ClientIP'] == "" OR $PhaseA['ServerIP'] == "") {
     header("Status: 200");
     print "\nIPv6 not supported by now, sorry\n";
 
+    $prova = fopen("prova.txt", "w");
+    $counter = 0;
+    while ($counter < $BodySize) {
+        fwrite($prova, $BODY[$counter++]);
+    }
+    fclose($prova);
     exit();
 }
 
