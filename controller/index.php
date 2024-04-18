@@ -505,13 +505,7 @@ if ($PhaseA['ClientIP'] == "" OR $PhaseA['ServerIP'] == "") {
     header("HTTP/1.1 200 Ok");
     header("Status: 200");
     print "\nIPv6 not supported by now, sorry\n";
-
-    $prova = fopen("prova.txt", "w");
-    $counter = 0;
-    while ($counter < $BodySize) {
-        fwrite($prova, $BODY[$counter++]);
-    }
-    fclose($prova);
+    
     exit();
 }
 
