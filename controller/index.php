@@ -85,9 +85,18 @@ while ( $line < $BodySize) {
             if (preg_match('/^\-\-[a-f0-9]+\-[BCEFHIKZ]\-\-$/i', trim($BODY[$line]))) {
                 break;
             } else {
-                // matching before 2.9.4 
-                if (preg_match('/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@]{27})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',
-            trim($BODY[$line]), $matchesA)) {
+                $pattern = array ('/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@]{24})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',               //matching 2.9.0
+                                    '/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@]{27})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',             //matching 2.9.2, 2.9.3
+                                    '/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\.(\d{6})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@\_]{27})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i'); //matching 2.9.5
+                
+                $counter = 0;
+                $matchesA = null;
+                
+                while($matchesA == null && $counter < 4) {
+                    preg_match($pattern[$counter++], trim($BODY[$line]), $matchesA);
+                }
+
+                if ($matchesA != null && $counter < 3) {
                     $PhaseA['Day'] = $matchesA[1];
                     $months        = array(null, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
                     foreach ($months as $key => $month) {
@@ -107,8 +116,7 @@ while ( $line < $BodySize) {
                     $PhaseA['ServerPort'] = $matchesA[10];
                 }
                 // matching after 2.9.4
-                else if (preg_match('/^\[(\d{1,2})\/(\w{3})\/(\d{4})\:(\d{2}\:\d{2}\:\d{2})\.(\d{6})\s(\-\-\d{4}|\+\d{4})\]\s([a-zA-Z0-9\-\@\_]{27})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})\s([12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2}\.[12]?[0-9]{1,2})\s(\d{1,5})/i',
-                trim($BODY[$line]), $matchesA)) {
+                else if ($matchesA != null && $counter == 3) {
                     $PhaseA['Day'] = $matchesA[1];
                     $months        = array(null, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec');
                     foreach ($months as $key => $month) {
@@ -505,7 +513,7 @@ if ($PhaseA['ClientIP'] == "" OR $PhaseA['ServerIP'] == "") {
     header("HTTP/1.1 200 Ok");
     header("Status: 200");
     print "\nIPv6 not supported by now, sorry\n";
-    
+
     exit();
 }
 
@@ -609,7 +617,7 @@ try {
     $insert_sth->bindParam(":PhaseADate", $PhaseA['Date']);
     $insert_sth->bindParam(":PhaseAUniqID", $PhaseA['UniqID']);
     $insert_sth->bindParam(":PhaseAClientIP", $PhaseA['ClientIP']);
-    /*
+    
     // Get Country Code of IP Address
     $ClientIPCC = geoip_country_code_by_name($PhaseA['ClientIP']);
     if (!$ClientIPCC) {
@@ -622,9 +630,7 @@ try {
     } elseif ( $ClientIPASN == "") {
        $ClientIPASN = '0';
     }
-    */
-    $ClientIPCC = '';
-    $ClientIPASN = '0';
+
     $insert_sth->bindParam(":PhaseAClientIPCC", $ClientIPCC);
     $insert_sth->bindParam(":PhaseAClientIPASN", $ClientIPASN);
     $insert_sth->bindParam(":PhaseASourcePort", $PhaseA['SourcePort']);
