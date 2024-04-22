@@ -19,16 +19,24 @@ ABOUT THIS FORK:
 ---------
 What's new:
    - PHP 8.x
-   - Admin User and Normal User
+   - Admin User and Normal User (read more later)
    - Zoom in Total Event Graphs
    - Removed APC references, now it supports only APCu
    - Updated SQL queries
+   - ModSecurity 2.9.3+ (older versions in the next update)
 
 To do:
    - Update Tags from OWASP Top 10 2021
    - Update graphs 
    - Update style
    - Everything that comes to mind
+
+If you upgrade from version 0.6.x, you will need to update the DB. 
+I'll try to create an automatic update file asap, but for now you will
+have to update manually. A new column ('admin') has been added in the
+'users' table. It is a tinyint(1) value that can assume two values:
+ - 0: normal user
+ - 1: admin user
 
 Feel free to suggest new functionalities! 
 
