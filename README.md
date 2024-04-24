@@ -37,6 +37,7 @@ have to update manually. A new column ('admin') has been added in the
 'users' table. It is a tinyint(1) value that can assume two values:
  - 0: normal user
  - 1: admin user
+ 
 You have also to expand the maximum char for the column 'a_uniqid' in
 the 'events' table from char(24) to char(64).
 

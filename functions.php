@@ -139,9 +139,11 @@ try {
    $checkVersion_sth->execute();
    $dbSchema = $checkVersion_sth->fetch(PDO::FETCH_ASSOC);
    $checkVersion_sth->closeCursor();
+   
    if ($dbSchema['waffle_version'] == '0.7.0') {
        $dbSchema['waffle_version'] = '0.7.1';
    }
+   
    if ($dbSchema['waffle_version'] != $waffleVersion) {
       header ("Location: upgrade.php");
       exit;
@@ -823,9 +825,10 @@ function getTagName($tag_id)
     if ($APC_ON AND ($tag_name = apcu_fetch('tag_'.$tag_id))) {
         $tag_name = $tag_name;
     } else {
-        $sqlGetTagName = '  SELECT `tag_id`, `tag_name` FROM `tags`
-                            UNION
-                            SELECT `tag_id`, `tag_name` FROM `tags_custom`
+        $sqlGetTagName = '
+                        SELECT `tag_id`, `tag_name` FROM `tags`
+                        UNION
+                        SELECT `tag_id`, `tag_name` FROM `tags_custom`
                         ';
         if ($DEBUG) {
                 $debugInfo[__FUNCTION__][$debugCount]['query'] = $sqlGetTagName;
@@ -4157,7 +4160,7 @@ function networkRange($ipAddRange)
 {
     if (preg_match('/^([12]?\d{1,2}\.[12]?\d{1,2}\.[12]?\d{1,2}\.[12]?\d{1,2})(\/\d{1,2})?$/', $ipAddRange, $ip_result)) {
         $ip_addr = $ip_result[1];
-        if ($ip_result[2] != "") {
+        if (isset($ip_result[2]) && $ip_result[2] != "") {
                 $cidr = str_replace("/", "", $ip_result[2]);
         } else {
                 $cidr = 32;
@@ -4224,7 +4227,7 @@ function session_refresh()
 	if (isset($_SESSION['login'])) {
 		$_SESSION['LAST_ACTIVITY'] = time(); 
 	}
-	return;
+    return; 
 }
 
 

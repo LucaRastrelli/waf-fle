@@ -92,7 +92,7 @@ while ( $line < $BodySize) {
                 $counter = 0;
                 $matchesA = null;
                 
-                while($matchesA == null && $counter < 4) {
+                while($matchesA == null && $counter < 3) {
                     preg_match($pattern[$counter++], trim($BODY[$line]), $matchesA);
                 }
 
@@ -473,7 +473,7 @@ while ( $line < $BodySize) {
         }
     }
     // Match phases not yet implemented
-    if (preg_match('/^\-\-[a-f0-9]+\-[^ABCEFHIKZ]\-\-$/i', trim($BODY[$line]))) {
+    if (isset($BODY[$line]) && preg_match('/^\-\-[a-f0-9]+\-[^ABCEFHIKZ]\-\-$/i', trim($BODY[$line]))) {
         while ( $line < $BodySize ) {
             if (preg_match('/^\-\-[a-f0-9]+\-[ABCEFHIKZ]\-\-$/i', trim($BODY[$line]))) {
                 break;
@@ -766,7 +766,7 @@ try {
     exit();
 }
 
-if (is_array($PhaseH_MSG) && $event_id != "") {
+if (isset($PhaseH_MSG) && is_array($PhaseH_MSG) && $event_id != "") {
 
     $sql_event_message = 'INSERT INTO `events_messages` (`event_id`, `h_message_pattern`, `h_message_action`, `h_message_ruleFile`,`h_message_ruleLine`, `h_message_ruleId`, `h_message_ruleData`, `h_message_ruleSeverity`) VALUES (:eventid,  :MessagePattern, :MessageAction, :MessageFile, :MessageLine, :MessageRuleId, :MessageData, :MessageSeverity)';
     $insert_msg_sth = $dbconn->prepare($sql_event_message);

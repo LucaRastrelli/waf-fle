@@ -26,9 +26,9 @@ if ($DEBUG) {
 }
 session_start();
 
-if ($_POST['submit'] == "go") {
+if (isset($_POST['submit']) && $_POST['submit'] == "go") {
     logoff();
-} elseif ($_POST['submit'] == "continue") {
+} elseif (isset($_POST['submit']) && $_POST['submit'] == "continue") {
     header("HTTP/1.1 302 Found"); 
     if ($_POST['ref'] != "") {
         header("Location: ".sanitize_paranoid_path($_POST['ref']));

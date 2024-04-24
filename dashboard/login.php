@@ -26,7 +26,7 @@ if ($DEBUG) {
 ini_set("session.cookie_httponly", 1);
 session_start();
  
-if ($_POST['submit'] == "submit") {
+if (isset($_POST['submit']) && $_POST['submit'] == "submit") {
     if ($_POST['user'] == "" || $_POST['pass'] == "") {
         $emptyField = true;
     } else {
@@ -44,7 +44,7 @@ if ($_POST['submit'] == "submit") {
             $_SESSION['LAST_ACTIVITY'] = time(); // define first "last activity" timestamp
             $_SESSION['CREATED'] = time(); // initialize the session create timestamp
 
-            if ($userlogon[0]['changePass']) {
+            if (isset($userlogon[0]['changePass']) && $userlogon[0]['changePass']) {
                $_SESSION['forceChangePass'] = true;
             } 
             session_regenerate_id(true);    // change session ID for the current session an invalidate old session ID
@@ -104,11 +104,11 @@ if ($_POST['submit'] == "submit") {
          <div id="login">
             Please enter your authentication bellow
 <?PHP
-if ($emptyField) {
+if (isset($emptyField) && $emptyField) {
     print "<br /><font color=\"red\"><b>Fill both: username and password</b></font>";
-} elseif ($authFailed) {
+} elseif (isset($authFailed) && $authFailed) {
     print "<br /><font color=\"red\"><b>Invalid Username or Password</b></font>";
-} elseif ($userExpired) {
+} elseif (isset($userExpired) && $userExpired) {
     print "<br /><font color=\"red\"><b>User expired</b></font>";
 }
 ?>

@@ -18,7 +18,7 @@
 
 ?>
 <?PHP
-if ($_SESSION['forceChangePass'] AND $pagId != 'password') {
+if (isset($_SESSION['forceChangePass']) && $_SESSION['forceChangePass'] AND $pagId != 'password') {
 	header('HTTP/1.1 302 Found');
 	header('Location: password.php?User='.$_SESSION['userID']);
 	header('Connection: close');
@@ -50,7 +50,7 @@ if (isset($jsChart) AND $jsChart) {
    <script language="javascript" type="text/javascript" src="js/flexigrid.pack.js"></script>
    <script language="javascript" type="text/javascript" src="js/jquery.tipTip.minified.js"></script>
 <?PHP
-if ($jsChart) {
+if (isset($jsChart) && $jsChart) {
     ?>
       <!--[if lt IE 9]>
          <script language="javascript" type="text/javascript" src="js/excanvas.js"></script>
@@ -365,9 +365,9 @@ if ($jsChart) {
 </head>
 
 <body>
-   <div id="header">
+   	<div id="header">
       <div id="logo"> <a style="padding: 0;" href="./index.php"><img src="images/logot.png" width="126" height="60" border="0" alt="WAF-FLE"></a></div>
-      <div id="user"><p>Logged User: <b><?PHP print $_SESSION['userName']; ?></b> | <a href="./logout.php">Logout</a></p></div>
-      <div id="clear"> </div>
+		<div id="user"><p>Logged User: <b><?PHP print $_SESSION['userName']; ?></b> | <a href="./logout.php">Logout</a></p></div>
+		<div id="clear"> </div>
       <div id="menu"><p><b> <a href="./index.php">HOME</a>   |    <a href="./events.php">EVENTS</a>   |    <a href="#" id="dialog_link">FILTER</a>    |    <a href="./management.php">MANAGEMENT</a> </b></p></div>
-   </div>
+	</div>
