@@ -166,10 +166,10 @@ if (isset($_GET['s'])) {  // Sensors Tasks
         }
                 
         if ($_POST['clientIPinHeader'] == "1") {
-            $clientIpInHeader = true;
+            $clientIpInHeader = 1;
             $clientIpHeader = @sanitize_paranoid_string($_POST['clientIPHeader'], $min = '2', $max = '40');
         } else {
-            $clientIpInHeader = false;
+            $clientIpInHeader = 0;
             $clientIpHeader = null;
         }
         $sensorDescription = @sanitize_paranoid_string($_POST['Description']);

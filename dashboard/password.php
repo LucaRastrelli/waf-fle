@@ -43,9 +43,14 @@ do if (isset($_POST['Pass']) AND $_POST['Pass'] == "Change Password" AND $_POST[
       $changeResult[] = "Invalid caracter: use \"a-z A-Z 0-9 . - _ @ / ? = &\", case sensitive.";
       break;
    }
-
+   if($_POST['admin'] == "on"){
+      $userAdmin = 1;
+   }
+   else {
+         $userAdmin = 0;
+   }
    if ($userToSave) {
-      $userSaveResult = userSave($userToSave, '', '', $userPass);
+      $userSaveResult = userSave($userToSave, '', '', $userPass, $userAdmin);
       if (!$userSaveResult) {
           $changeResult[] = "An error occour with password change, please check it and try again";
       } else {
@@ -92,6 +97,9 @@ do if (isset($_POST['Pass']) AND $_POST['Pass'] == "Change Password" AND $_POST[
             print "</tr><tr>";
             print "<td>Password (confirmation)</td><td><input type=\"password\" name=\"newPass2\" value=\"\"> (Min. 5 - Max. 20 characters)</td>";
             print "</tr>";
+            print "<td>Admin</td><td><input type=\"checkbox\" name=\"admin\""; 
+            if($user[0]['admin']) print "checked";
+            print "></td></tr>";
             print "<tr><td>";
             print "<input type=\"submit\" name=\"Pass\" value=\"Change Password\">";
             print "</table>";
